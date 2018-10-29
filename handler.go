@@ -1,6 +1,7 @@
 package metrics
 
 import (
+	"fmt"
 	"net"
 	"net/http"
 	"strconv"
@@ -140,4 +141,11 @@ func (w *timedResponseWriter) WriteHeader(statuscode int) {
 	// just setting a status code and returning.
 	w.didWrite()
 	w.ResponseWriter.WriteHeader(statuscode)
+}
+
+func (w *timedResponseWriter) CloseNotify() <-chan bool {
+	if cn, ok := w.ResponseWriter.(http.CloseNotifier); ok {
+		return cn.CloseNotify()
+	}
+	panic(fmt.Sprintf("%T is not a closeNotifier", w.ResponseWriter))
 }
